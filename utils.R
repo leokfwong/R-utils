@@ -78,3 +78,44 @@ fn.importData <- function(MDBPATH, TABLES, DROP_VARS = c(), ORDER_BY = c(), PWD 
   rm(channel)
 
 }
+
+fn.formatDates <- function() {
+
+  # Function iterates through all dataframes in global environment and converts
+  # all POSIXct, POSIXt values into "Date" format.
+  #
+  # Args: {none}
+  #
+  # Returns: {none}
+
+  # Iterate through objects in global environment
+  for (obj in ls(envir = .GlobalEnv)) {
+
+    # If object is a dataframe
+    if (class(get(obj)) == "data.frame") {
+
+      # Get the dataframe
+      df <- get(obj)
+
+      # Iterate through every variable within dataframe
+      for (field in names(df)) {
+
+        # Find variables that are in POSIXct, POSIXt format
+        if (all(class(df[[field]]) == c("POSIXct", "POSIXt"))) {
+
+          print(paste0("Converting ", field, " from ", obj, " to date format."))
+
+          # Convert variable to "Date"
+          df[[field]] <- as.Date(df[[field]])
+
+          # Fix obvious typos in dates
+          df[[field]] <- fn.fixObviousInvalidDates(df[[field]])
+
+          # Assign obj to global environment
+          assign(obj, df, envir = .GlobalEnv)
+
+        }
+      }
+    }
+  }
+}

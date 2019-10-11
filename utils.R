@@ -3,14 +3,14 @@ fn.importData <- function(MDBPATH, TABLES, DROP_VARS = c(), ORDER_BY = c(), PWD 
   # Function connects to any Access database, fetches one or multiple tables and loads them
   # into R's global environment.
   #
-  # Args:
+  # args:
   #   MDBPATH {character}: absolute path specifying location of database.
   #   TABLES {vector}: vector of table names {character} to be loaded from Access.
   #   DROP_VARS {vector}: vector of variables to exclude. Empty vector by default.
   #   ORDER_BY {vector}: vector of variables which determine howto sort table. Empty vector by default.
   #   PWD {character}: password string required to access protected database. Empty vector by default.
   #
-  # Returns:
+  # return:
   #   {none}
 
   # NOTE: Make sure you are using R 32-bit, since the 64-bit version is not compatible with RODBC.
@@ -84,9 +84,9 @@ fn.formatDates <- function() {
   # Function iterates through all dataframes in global environment and converts
   # all POSIXct, POSIXt values into "Date" format.
   #
-  # Args: {none}
+  # args: {none}
   #
-  # Returns: {none}
+  # return: {none}
 
   # Iterate through objects in global environment
   for (obj in ls(envir = .GlobalEnv)) {
@@ -118,4 +118,50 @@ fn.formatDates <- function() {
       }
     }
   }
+}
+
+fn.sortDataFrame <- function(df, order_by, ascend = TRUE) {
+  # Function sorts the rows of a dataframe in a specific order based on an input
+  # vector of variable names. 
+  #
+  # args:
+  #   df {dataframe} - dataframe to be sorted
+  #   order_by {vector} - vector containing the variables to order by
+  #                       (ie. c("unique_id", "last_name", "first_name"))
+  #
+  # return:
+  #   df {dataframe} - sorted dataframe
+
+  # TODO: Implement custom sorting for each variable:
+  # Demographics[order(-rank(Demographics$centre_id), Demographics$patient_id),]
+  # The reason we need rank is that non-numeric values cannot be reversed using -()
+
+  # A) Concatenate string to order dataframe
+  # Initialize empty string
+  str <- ""
+
+  # Iterate through variables and concatenate to string
+  for (itm in order_by) {
+
+    str <- paste0(str, "df$", itm, ", ")
+
+  }
+
+  # Trim whitespace and remove last comma
+  str <- trimws(str)
+  str <- substr(str, 1, nchar(str) - 1)
+
+  # Assemble entire command into string
+  if (ascend) {
+    str <- paste0("df[order(", str, "),]")
+  } else {
+    str <- paste0("df[order(", str, ", decreasing = TRUE),]")
+  }
+
+  # Evaluate string (order)
+  df <- eval(parse(text = str))
+
+  # Return ordered dataframe
+  return(df)
+
 }

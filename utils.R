@@ -1,3 +1,31 @@
+fn.initializeConstants <- function() {
+
+  # Function initializes and loads constants into global environment so that they can be used
+  # by other functions. For some projects, there might be a large amount of constant
+  # variables we might want to compartmentalize. This leverages the fact that variables
+  # initialize within this function can be accessed using ls(), which we can then assign
+  # to the global environment for usage outside of this function.
+  #
+  # args:
+  #   none
+  #
+  # return:
+  #   none
+
+  # Initialize by constants 
+  BY_CPV <- c("centre_id", "patient_id", "visit")
+  BY_CP <- c("centre_id", "patient_id")
+  TIMEORIGIN <- "1970-01-01"
+
+  # Iterate through all items in current environment
+  for (const in ls()) {
+
+    # Assign to global environment
+    assign(const, get(const), envir = .GlobalEnv)
+
+  }
+
+}
 
 fn.importData <- function(MDBPATH, TABLES, DROP_VARS = c(), ORDER_BY = c(), PWD = "") {
   # Function connects to any Access database, fetches one or multiple tables and loads them
